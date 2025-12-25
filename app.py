@@ -1,22 +1,24 @@
-
 import os
 os.environ["ULTRALYTICS_NO_CV2"] = "1"
 
 import streamlit as st
-from ultralytics import YOLO
 from PIL import Image
 import numpy as np
+import torch
+from ultralytics import YOLO
+from ultralytics.nn.tasks import DetectionModel  # required for safe load
 
 # Page config
-st.set_page_config(page_title="Mask Detection", layout="centered")
-
+st.set_page_config(page_title="Number Plate Detection", layout="centered")
 st.title("Number Plate Detection App")
-st.write("Upload an image to detect ")
+st.write("Upload an image to detect")
 
-# Load model 
+# Load model safely
 @st.cache_resource
 def load_model():
-    model = YOLO("best.pt")
+    # Safe context to allow DetectionModel class
+    with torch.serialization.safe_globals([DetectionModel]):
+        model = YOLO("best.pt")  # path to your trained YOLO model
     return model
 
 model = load_model()
